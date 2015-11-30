@@ -1,64 +1,44 @@
+'use strict';
 var express = require('express');
+var http = require('http');
 var path = require('path');
-var favicon = require('serve-favicon');
-var logger = require('morgan');
-var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
-
-var routes = require('./routes/index');
-var users = require('./routes/users');
-
+var methodOverride = require('method-override');
+var logger = require('morgan');
+var fs = require('fs');
+var router = express.Router({
+    caseSensitive: true,
+    strict: true
+});
 var app = express();
 
-// view engine setup
+var httpServer = http.createServer(app);
+
+app.set('port', process.env.PORT || 3000);
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
-
-// uncomment after placing your favicon in /public
-//app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(logger('dev'));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({
-    extended: false
-}));
-app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
+//app.use(compression());
+app.use(bodyParser.urlencoded({extended: false, limit: 1024 * 1024 * 5}));
+app.use(bodyParser.json({limit: 1024 * 1024 * 5}));
+app.use(methodOverride());
 
-app.use('/', routes);
-app.use('/users', users);
+var allowCrossDomain = function (req, res, next) {
+    var browser = req.headers['user-agent'];
+    if (/Trident/.test(browser)) {
+        res.header('Cache-Control', 'no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0');
+    }
+    next();
+};
+app.use(allowCrossDomain);
+app.use(router);
 
-// catch 404 and forward to error handler
-app.use(function (req, res, next) {
-    var err = new Error('Not Found');
-    err.status = 404;
-    next(err);
+require('./routes/index')(app, express);
+
+httpServer.listen(app.get('port'), function () {
+    console.log("Express server listening on port " + app.get('port'));
 });
 
-// error handlers
-
-// development error handler
-// will print stacktrace
-if (app.get('env') === 'development') {
-    app.use(function (err, req, res, next) {
-        console.error(err);
-        res.status(err.status || 500);
-        res.render('error', {
-            message: err.message,
-            error: err
-        });
-    });
-}
-
-// production error handler
-// no stacktraces leaked to user
-app.use(function (err, req, res, next) {
-    console.error(err);
-    res.status(err.status || 500);
-    res.render('error', {
-        message: err.message,
-        error: {}
-    });
-});
-
-
-module.exports = app;
+module.exports = {
+    app: app
+};
