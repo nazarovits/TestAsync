@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title><%= title %></title>
+    <link rel='stylesheet' href='/css/style.css' />
+    <link href="/css/jquery-ui.css" rel="stylesheet">
+</head>
+<body>
+<h1><%= title %></h1>
+<p>Welcome to <%= title %></p>
+<p><a href="/"> Home </a></p>
+
+<form action="/makeRequests" method="POST">
+
+    <div class="req">
+        <!--<label for="host">Host</label>-->
+        <div style="height: 45px; width: 100%">
+            <ul class="requestParams" style="list-style: none;">
+                <li>
+                    <h2 class="header">Host</h2>
+                    <input type="text" id="host" name="host" placeholder="Host" value="http://localhost:8850" />
+                </li>
+                <li>
+                    <h2 class="header" style="display: inline">Type</h2>
+                    <div class="radioset" style="display: inline-block;">
+                        <input type="radio" id="parallel" name="type" checked="checked" value="parallel"><label for="parallel">parallel</label>
+                        <input type="radio" id="series" name="type" value="series"><label for="series">serries</label>
+                    </div>
+                </li>
+                <li>
+                    <h2 class="header" style="display: inline"><label for="count">Count</label></h2>
+                    <input class="spinner" type="text" name="count" value="10"/>
+                </li>
+            </ul>
+<!--            <div class="radioset" style="position: relative;top: -37px;left:36px;margin: 0">
+                    <input type="text" id="host" name="host" placeholder="Host" value="http://localhost:8850" />
+                <div class="radioset" style="display: inline;">
+                    <input type="radio" id="parallel" name="type" checked="checked"><label for="parallel">parallel</label>
+                    <input type="radio" id="series" name="type"><label for="series">serries</label>
+                </div>
+                <input class="spinner" type="text" name="count" value="10"/>
+
+            </div>-->
+        </div>
+        <p></p>
+
+        <div style="width: 100%">
+            <input type="text" name="Url" placeholder="url" value="/documents/signAndSend"/>
+            <select id="method" name="method" class="selectmenu">
+                <option selected="selected">GET</option>
+                <option>POST</option>
+                <option>PUT</option>
+                <option>PATCH</option>
+                <option>DELETED</option>
+            </select>
+        </div>
+    </div>
+
+    <table>
+        <!--<tr>
+            <td><label for="host">host </label></td>
+            &lt;!&ndash;<td><input type="text" name="host" value="http://localhost:8850"/></td>&ndash;&gt;
+            <td><input type="text" name="host" value="http://localhost:8850"/></td>
+        </tr>-->
+        <!--<tr>
+            <td><label for="url">url </label></td>
+            <td><input type="text" name="url" value="/documents/signAndSend"/></td>
+        </tr>-->
+        <!--<tr>
+            <td><label for="method">method </label></td>
+            <td><input type="text" name="method" value="POST"/></td>
+        </tr>-->
+        <!--<tr>
+            <td><label for="count">count </label></td>
+            <td><input type="text" name="count" value="10"/></td>
+        </tr>-->
+        <!--<tr>
+            <td><label for="type">Type </label></td>
+            <td>
+            <input type="radio" name="type" value="parallel" checked="checked"> <label>parallel</label>
+            <input type="radio" name="type" value="series"> <label>series</label>
+            </td>
+        </tr>-->
+        <tr>
+            <td><label for="reqBody">Body</label></td>
+            <td>
+                <textarea id="reqBody" name="reqBody" rows="10" cols="50" onkeydown="changeReqBody(this)" onclick="changeReqBody(this)">
+{
+    "name": "foo",
+    "value": 1
+}
+                </textarea>
+            </td>
+        </tr>
+        <tr>
+            <td></td>
+            <td id="isValidJSON" style="color: orangered"></td>
+        </tr>
+
+        <tr></tr>
+        <tr>
+            <td></td>
+            <td><input type="submit" name="" value="Let's go ..."/></td>
+        </tr>
+    </table>
+
+    <% if (results) {%>
+    <h2>Results</h2>
+    <table>
+        <tr>
+            <th>Nom</th>
+            <th>Status</th>
+            <th>Time</th>
+            <th>Error</th>
+        </tr>
+
+        <%  var count = 0; %>
+        <% results.forEach(function (item) {
+            var timeDiff = item.end - item.start;
+            var color = 'black';
+
+            count++;
+
+            if ((200 < timeDiff) && (timeDiff < 350)) {
+                color = 'orange';
+            }
+            if ( timeDiff > 350) {
+                color = 'red';
+            }
+        %>
+
+            <tr>
+                <td><%= count %></td>
+                <td><%= item.status %></td>
+                <td style="color:<%= color %>;"><%= timeDiff%>  ms</td>
+                <td><%= item.error %></td>
+            </tr>
+        <% }); %>
+    </table>
+    <% }%>
+
+</form>
+<button class="test" onclick="test()">Test</button>
+
+<script src="/js/jquery.js"></script>
+<script src="/js/jquery-ui.js"></script>
+<script>
+
+    $( ".selectmenu" ).selectmenu();
+    $( ".radioset" ).buttonset();
+    $( ".spinner" ).spinner();
+
+    function changeReqBody (context) {
+        var text = context.value;
+
+        try {
+            JSON.parse(text);
+            document.getElementById('isValidJSON').innerText = '';
+        } catch (err) {
+            document.getElementById('isValidJSON').innerText = 'Invalid JSON';
+        }
+    }
+
+    function test(context) {
+        var reqBody = document.getElementById('reqBody');
+        console.log(reqBody.value);
+    }
+</script>
+
+</body>
+</html>
