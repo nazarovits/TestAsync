@@ -8,11 +8,11 @@ var tests = require('../handlers/tests');
 
 module.exports = function (app) {
     var collectionsRouter = require('./collections')(app);
-    var controlFollowsRouter = require('./controlFollows')(app);
+    var controlFollowsRouter = require('./controlFlows')(app);
     var loopsRouter = require('./loops')(app);
 
     app.use('/collections', collectionsRouter);
-    app.use('/controlFollows', controlFollowsRouter);
+    app.use('/controlFlows', controlFollowsRouter);
     app.use('/loops', loopsRouter);
 
     app.get('/', function (req, res, next) {
